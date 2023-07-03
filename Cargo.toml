@@ -6,3 +6,6 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+rocket = {git = "https://github.com/SergioBenitez/Rocket", features = ["json"]}
+serde = {git = "https://github.com/serde-rs/serde", features = ["derive"]}
+serde_json = {git = "https://github.com/serde-rs/json"}

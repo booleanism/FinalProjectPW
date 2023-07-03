@@ -1,0 +1,13 @@
+.navigation{
+    height: 50px;
+    background-color: aquamarine;
+    align-items: center;
+    align-content: center;
+    text-align: center;
+}
+
+.nav-items{
+    position: relative;
+    right: 200px;
+    bor
+}
