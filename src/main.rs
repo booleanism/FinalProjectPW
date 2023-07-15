@@ -1,5 +1,7 @@
 #![feature(exact_size_is_empty)]
 
+use std::path::PathBuf;
+
 use FinalProjectPW::{AuthUser, crud::{Db, Koneksi}, schema::{User, History}};
 
 use FinalProjectPW::{DownCamp, Parser};
@@ -37,10 +39,9 @@ struct BcLinkRes {
 struct Pass {
     cpasswd: String,
     npasswd: String,
-    // id: i32,
 }
 
-static CONNSTR: &str = "postgres://postgres:12345@192.168.18.252:5432/bcdl";
+static CONNSTR: &str = "postgres://postgres:12345@192.168.1.26:5432/bcdl";
 
 async fn is_loged_in(cookie: &CookieJar<'_>) -> bool {
     let pool = Db::new(CONNSTR.to_string()).await;
@@ -103,13 +104,13 @@ async fn index(cookie: &CookieJar<'_>) -> Template {
     Template::render("index", context! { logedin: is_loged_in, isdownloading: false})
 }
 
-// #[get("/<file..>")]
-// async fn catch_all(file: PathBuf, cookie: &CookieJar<'_>) -> Template {
-//     let name_tera = file.to_str().unwrap().replace(".html", "");
-//     println!("{}", name_tera);
-//     let is_loged_in = is_loged_in(cookie).await;
-//     Template::render(name_tera, context! { logedin: is_loged_in})
-// }
+#[get("/<image..>")]
+async fn get_image(image: PathBuf) -> Option<NamedFile> {
+    Some(NamedFile::open(format!("public/{}", image.to_str().unwrap()))
+        .await
+        .ok()
+        .unwrap())
+}
 
 #[get("/script.js", format = "application/javascript")]
 async fn script() -> Option<NamedFile> {
@@ -175,10 +176,6 @@ async fn reg(user: Json<AuthUser>) -> Status {
     Status::Created
 }
 
-/*
-* panggil fungsi pada library bcdownloader
-* 
- */
 #[post("/bclink", format = "application/json", data = "<user>")]
 async fn bclink(user: Json<BcLinkReq>, cookie: &CookieJar<'_>) -> Template {
     let data = user.into_inner();
@@ -236,5 +233,8 @@ async fn change_pas(pass: Json<Pass>, cookie: &CookieJar<'_>) -> Status {
 
 #[launch]
 async fn rocket() -> _ {
-    rocket::build().mount("/", routes![index, login, signup, about, auth, reg, bclink, script, css, logout, profile, change_pas]).attach(Template::fairing())
+    rocket::build().mount("/", routes![
+        index, login, signup, about, 
+        auth, reg, bclink, script, css, 
+        logout, profile, change_pas, get_image]).attach(Template::fairing())
 }
